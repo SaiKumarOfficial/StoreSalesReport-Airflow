@@ -1,0 +1,138 @@
+AIRFLOW
+
+it is workflow engine that will easily schedule and your complex data pipelines. it will make sure that each task in data pipeline will
+execute in order.
+It allows the code to create dynamic pipelines. It is accessible,scalable. It has a modular architecture and a message queue to orchestrate
+and arbitary no.of workers.
+
+why we are using it?
+
+ETL - Extract Transform Load
+For each stage, we write script.
+
+when this big data started evalving , pipelines became more complicated and it is very difficult to manage all the tasks in pipeline.
+
+Problem statement: 
+    we have to automate a pipeline in which there is a set of tasks which run dialy at 9am UTC and does the following in sequence :-
+    - polls for data avilability
+    - Extract and processes the data
+    - stores in some data store(say hdfs)
+
+cons by solving with ETL Scripts: 
+    - Monitoring a cronjob is a complicated task.
+    - nO Proper visualization
+    - no proper distibuted computing
+    - no implicit alerting
+    - even we don't have a statistical data where we moving to debug some of the tasks
+
+
+Prolems with Conventional scheduler/methods:
+ - Error handling ( what if the 3 jobs(ETL) fails. should it retry ? )
+ - Changes are not traceable 
+ - Execution dependency(ex: if task-A start at 9 am and finish at 10 am . Task-b is from 10:05 to 11 am,. Assume there is somefailure in job, task-A will not execute.Becuause one task will depend on another )
+ - Transparency (In cron, the log of job outputs are not kept in centralized place. IT is difficult to navigate logs)
+ - Task status tracking
+ - Processing the historical data 
+
+
+To overcome these problems:
+
+Airflow is a combination of scheduling,alerting, Monitoring the platform and can work independently without any modifications in the main job code.
+
+See Principles  on website : https://airflow.apache.org/docs/apache-airflow/2.2.5/index.html#principles
+
+ Airflow is not a data streaming solution. Tasks do not move data from one to the other (though tasks can exchange metadata!).
+ It is not a ETL tool.
+
+
+ Basics concepts in AIRFLOW:
+
+    1. DAG:
+        DAG is collection of all small tasks and joint to perform a big task.
+        In Airflow, a DAG – or a Directed Acyclic Graph – is a collection of all the tasks you want to run, organized in a way that reflects their relationships and dependencies.
+        A DAG is defined in a Python script, which represents the DAGs structure (tasks and their dependencies) as code.
+        Check here : https://airflow.apache.org/docs/apache-airflow/1.10.12/concepts#dags
+
+    2. Operators :
+        Operators are main building block of Airflow DAG.They are classes that encapsulates the logic to do unit of work.
+        When you create an instance of Operator in DAG and provide with its require parameters , it becomes a task. and Many tasks will added to the DAGS along with their dependencies when airflow excecute
+            the task in the execution time , then it becomes "task instance".
+            Check here: https://airflow.apache.org/docs/apache-airflow/1.10.12/concepts#operators
+
+    3. Scheduling the DAGS/Tasks :
+        The Airflow scheduler monitors all tasks and all dags and triggers the task instances whose dependencies have been matched
+        Airflow scheduler is designed to run a persistant service in airflow production environment.
+
+    4. Excecutors :
+        3 types of Excecutors:
+            - Local Excecutors (which the runs the task on the same scheduler) and Remote Excecutors(which the runs the task on the 'different' scheduler)
+            - Sequential Excecutors (Run the tasks in Sequential order)
+            - Debug Excecutors
+
+    5. Tasks :
+        A task is the basic unit of excecution in airflow. Tasks are arranged into DAGS and then have upstream and downstream dependencies set between them into order 
+        to express the order they should run in.
+        Check here: https://airflow.apache.org/docs/apache-airflow/1.10.12/concepts#tasks
+    
+    6. Workflow : 
+        Workflow is  a sequence of tasks arranged in a control dependency.
+        Workflow and DAG can be used interchangeably.
+
+Architecture of Airflow:
+
+    Metadata - metadata database contains the information about the DAS.(supports : defaul:SQLlite, production: MYsql,Postgres)
+    Scheduler - scheduler processes that uses DAG definition and state of the DAG. and decide which task needs to excecuted. (Execution managed)\
+    Excecutor - Excecutor is a process that is linked with the scheduler. It retrieves the tasks from the Scheduler and places them in a queue. and Determines which worker process
+                will carry out the each schedule task.
+
+        workers : workers are the process that excecute the task logically and save the results in a metadata database.
+
+Life-Cycle-of-Task :
+
+  Lets see Workflow,
+        While the scheduler is running first it load available DAG definition from DAG directory.To identiy / initialize any DAG execution from the metadata database, scheduler uses DAG definitions.
+        Scheduler examine the state of the task associated with currently running DAG and resolve any task dependencies and identiy the task must be excecuted and send them to the executer.
+            Update the task status as a "schedule". 
+        Excecutor gets the task that are schedule for running and ask them to worker queue and update the status of the newly queued task in the database move to queued. 
+        Each available worker selects a task from queue and begins executing it and Changing the task status to "queued" to "running". When the task is completed, the associated worker will
+            return to the  queue and update the task status in database whether it is 'successful' or 'fails'.
+        Scheduler modifies the state of the all the active DAG. so, if there is any unsuccessfull DAG run , then it repeates the above steps with given no.of retries which will given in config files.
+
+
+Installation of AIRFLOW in docker:
+
+    Download from here: https://hub.docker.com/r/apache/airflow
+    
+    docker-airflow : https://github.com/puckel/docker-airflow
+
+    Download zip file
+  #Use docker compose to run multiple containers.
+
+  run command : docker-compose -f .\docker-compose-LocalExecutor.yml up -d
+
+Exploring UI 
+
+Operators:
+ Check here: https://airflow.apache.org/docs/apache-airflow/stable/howto/operator/index.html
+
+
+ PROJECT: Store Sales Report
+
+ Requirements :
+  - Location wise profit
+  - Individual store profit
+
+Project workflow:
+
+  Read & clean input file -> save cleaned data in MYsql ->  Location wise profit
+                                                        |                          --> save results into csv -> send email
+                                                        ->  Store wise profit      
+
+we need to add extra components in the workflow. Those are mysql ,and send email function
+
+
+./store_files:/store_files_mysql/   ---> this means ./store_files from local directory are copied to "/store_files_mysql/" directory in a container
+
+mysql config file : It is used to create a table inside the mysql  - ./mysql.cnf:/etc/mysql/mysql.cnf 
+
+ykdshzgyqndsgjio
