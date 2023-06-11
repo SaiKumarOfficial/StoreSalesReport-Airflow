@@ -66,8 +66,30 @@ See Principles  on website : https://airflow.apache.org/docs/apache-airflow/2.2.
     4. Excecutors :
         3 types of Excecutors:
             - Local Excecutors (which the runs the task on the same scheduler) and Remote Excecutors(which the runs the task on the 'different' scheduler)
+                    - it can run multiple task instances
+                    - Mysql ,postgres
+                    - we can acheive parallelism
+                    - You can chagne it at docker-compose execute file by setting "EXECUTOR=Local"
+
             - Sequential Excecutors (Run the tasks in Sequential order)
+                    - it is lightwegiht local executer which available on default airflow
+                    - it is runs one task instance at a time
+                    - it is not production ready
+                    - No task will excecute in parallel
+                    - it run with SQLlite since SQLlite doesnot support multiple Connections
+                    - You can chagne it at docker-compose execute file by setting "EXECUTOR=Sequential"
             - Debug Excecutors
+            - Celery Excecutor :
+                    - it is a task queue and it distibute tasks across the multiple Celery workers
+                    - workload is distibuted to from main application to multiple celery workers with the help of message broker(RabbitMQ queue).
+                    - Mysql,postgres
+                    - it is a remote executor and used for horizontal scaling as well
+                    - it is also allows for the realtime processing and task scheduling
+                    - it is a fault tolerant unlike local executer
+                    - You can chagne it at docker-compose execute file by setting "EXECUTOR=Celery"
+
+
+
 
     5. Tasks :
         A task is the basic unit of excecution in airflow. Tasks are arranged into DAGS and then have upstream and downstream dependencies set between them into order 
@@ -148,3 +170,37 @@ enter password: *****
 use mysql;
 show tables; (check the clean_store_transactions table is present or not)
 
+ Airflow CLI commands:
+
+Run the following commands:
+
+docker exec -it <airflow-container-id> bash
+pwd 
+ls (Check the files)
+
+1.airflow list dags - Lists all the dags present in your dags directory.
+
+2.airflow initdb- initialize the metadata database.
+
+3.airflow webserver- start a airflow webserver instance which is responsible for feeding the data
+
+4.airflow scheduler- start a scheduler instance.
+
+5.airflow connections- this command will list all the connections that we see in UI.
+
+6.airflow list_tasks- list the tasks within a particular DAG.
+
+rator_v3
+
+7.airflow list_dag runs- This command list dag for a given DAG id.
+
+8.airflow trigger_dag-This command will trigger a DAG from CLI.
+
+9. airflow test- Runs a task without checking for dependencies and without storing its state in DB
+
+10. airflow next_execution- To get the next execution time of a DAG.
+
+11. airflow delete dag- It deleted all the records from airflow metadata database for the specified DAG
+
+
+For more CLI commands: https://airflow.apache.org/docs/apache-airflow/stable/cli-and-env-variables-ref.html
