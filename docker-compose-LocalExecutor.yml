@@ -15,7 +15,7 @@ services:
         environment:
             - MYSQL_ROOT_PASSWORD=password 
         volumes:
-            - ./store_files:/store_files_mysql/
+            - ./store_files:/var/lib/mysql-files/
             - ./mysql.cnf:/etc/mysql/mysql.cnf
 
     webserver:
@@ -28,11 +28,11 @@ services:
             - INSTALL_MYSQL=y
             - LOAD_EX=n
             - EXECUTOR=Local
-            - AIRFLOW_SMTP_SMTP_HOST=smtp.gmail.com 
-            - AIRFLOW_SMTP_SMTP_USER=sai680513@gmail.com 
-            - AIRFLOW_SMTP_SMTP_PASSWORD=ykdshzgyqndsgjio
-            - AIRFLOW_SMTP_SMTP_PORT=587
-            - AIRFLOW_SMTP_SMTP_MAIL_FROM=Airflow 
+            - AIRFLOW__SMTP__SMTP_HOST=smtp.gmail.com 
+            - AIRFLOW__SMTP__SMTP_USER=sai680513@gmail.com 
+            - AIRFLOW__SMTP__SMTP_PASSWORD=ykdshzgyqndsgjio
+            - AIRFLOW__SMTP__SMTP_PORT=587
+            - AIRFLOW__SMTP__SMTP_MAIL_FROM=Airflow 
         logging:
             options:
                 max-size: 10m

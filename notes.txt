@@ -135,4 +135,16 @@ we need to add extra components in the workflow. Those are mysql ,and send email
 
 mysql config file : It is used to create a table inside the mysql  - ./mysql.cnf:/etc/mysql/mysql.cnf 
 
-ykdshzgyqndsgjio
+For mysql connection in airflow : you need to go 
+ Running Airflow app -> Admin -> Connections -> Create new connection
+ set connection_id in tasks ( ex: mysql_conn_id="mysql_conn")
+
+Run the command after task 3 completed to check the table is exists or not:
+
+docker exec -it <mysql-container-id> bash
+mysql -u root -p
+enter password: *****
+
+use mysql;
+show tables; (check the clean_store_transactions table is present or not)
+
