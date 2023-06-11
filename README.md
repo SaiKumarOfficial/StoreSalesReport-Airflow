@@ -11,7 +11,7 @@ docker-compose -f .\docker-compose-LocalExecutor.yml up -d
 
 Click on http://localhost:8080/
 
-## Mysql connetion on Airflow
+## Mysql connection on Airflow
 
 Set the Mysql connetion on Airflow by following steps
 
